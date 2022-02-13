@@ -25751,6 +25751,8 @@ with pkgs;
 
   rhythmbox = callPackage ../applications/audio/rhythmbox { };
 
+  rustdesk-bin = callPackage ../applications/networking/remote/rustdesk-bin { };
+
   gradio = callPackage ../applications/audio/gradio { };
 
   puddletag = libsForQt5.callPackage ../applications/audio/puddletag { };
