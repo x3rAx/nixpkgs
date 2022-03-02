@@ -1,12 +1,11 @@
 { lib, stdenv
-, fetchurl
-, makeWrapper
+, alsa-lib
 , autoPatchelfHook
+, buildFHSUserEnv
 , dpkg
-, glib
+, fetchurl
 , gtk3
 , pulseaudio
-, alsa-lib
 , xdotool
 }:
 
@@ -19,40 +18,47 @@ let
     "x86_64-linux" = "bFoneLUA1to4dG7sOERnHOsEFWCzFolTse6qwZHTBpY=";
   }."${system}" or throwSystem;
 
-in stdenv.mkDerivation rec {
-  pname = "rustdesk";
-  version = "1.1.8";
+  rustdesk-deb = stdenv.mkDerivation rec{
+    pname = "rustdesk-deb";
+    version = "1.1.8";
 
-  src = fetchurl {
-    url = "https://github.com/rustdesk/rustdesk/releases/download/${version}/rustdesk-${version}.deb";
-    inherit sha256;
+    src = fetchurl {
+      url = "https://github.com/rustdesk/rustdesk/releases/download/${version}/rustdesk-${version}.deb";
+      inherit sha256;
+    };
+
+    buildInputs = [
+    ];
+
+    nativeBuildInputs = [
+      autoPatchelfHook
+      dpkg
+      gtk3
+      pulseaudio
+      alsa-lib
+      xdotool
+    ];
+
+    dontConfigure = true;
+    dontBuild = true;
+
+    unpackPhase = ''
+      dpkg-deb -x $src .
+    '';
+
+    installPhase = ''
+      mkdir -p $out
+      cp -r usr/ $out/
+    '';
   };
 
-  buildInputs = [
+in buildFHSUserEnv rec{
+  name = "rustdesk";
+  runScript = "rustdesk";
+
+  targetPkgs = pkgs: [
+    rustdesk-deb
   ];
-
-  nativeBuildInputs = [
-    dpkg
-    makeWrapper
-    autoPatchelfHook
-    glib
-    gtk3
-    pulseaudio
-    alsa-lib
-    xdotool
-  ];
-
-  dontConfigure = true;
-  dontBuild = true;
-
-  unpackPhase = ''
-    dpkg-deb -x $src .
-  '';
-
-  installPhase = ''
-    mkdir -p $out
-    cp -r usr/* $out/
-  '';
 
   meta = with lib; {
     description = "Yet another remote desktop software, written in Rust.";
