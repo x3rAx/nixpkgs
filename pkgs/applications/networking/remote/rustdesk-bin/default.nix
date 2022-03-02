@@ -48,7 +48,7 @@ let
 
     installPhase = ''
       mkdir -p $out
-      cp -r usr/ $out/
+      cp -r usr/bin usr/lib $out/
     '';
   };
 
